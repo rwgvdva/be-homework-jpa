@@ -1,5 +1,6 @@
 package com.springboot.member.controller;
 
+import com.springboot.member.entity.Stamp;
 import com.springboot.response.MultiResponseDto;
 import com.springboot.response.SingleResponseDto;
 import com.springboot.member.dto.MemberPatchDto;

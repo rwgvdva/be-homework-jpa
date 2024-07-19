@@ -1,5 +1,7 @@
-package com.springboot.order.entity;
+package com.springboot.question.entity;
 
+import com.springboot.answer.entity.Answer;
+import com.springboot.like.entity.Like;
 import com.springboot.member.entity.Member;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,48 +15,56 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-@Entity(name = "ORDERS")
-public class Order {
+@Entity(name = "QUESTIONS")
+public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderId;
+    private Long questionId;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus = OrderStatus.ORDER_REQUEST;
+    private QuestionStatus questionStatus = QuestionStatus.QUESTION_REGISTERED;
+
+    @Enumerated(EnumType.STRING)
+    private BoardStatus boardStatus = BoardStatus.BOARD_PUBLIC;
+
+    @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
+    private String content;
 
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(nullable = false, name = "LAST_MODIFIED_AT")
-    private LocalDateTime modifiedAt = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "MEMBER_ID")
     private Member member;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
-    private List<OrderCoffee> orderCoffees = new ArrayList<>();
+    @OneToOne(mappedBy = "question", fetch = FetchType.EAGER)
+    private Answer answer;
 
-    public void setOrderCoffee(OrderCoffee orderCoffee) {
-        orderCoffees.add(orderCoffee);
-        if (orderCoffee.getOrder() != this) {
-            orderCoffee.setOrder(this);
-        }
-    }
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
+    private List<Like> likes = new ArrayList<>();
 
-    public void addMember(Member member) {
-        if (!member.getOrders().contains(this)) {
-            member.getOrders().add(this);
+    public void addMember(Member member){
+        if(!member.getQuestions().contains(this)){
+            member.getQuestions().add(this);
         }
         this.member = member;
     }
 
+    public void setAnswer(Answer answer){
+        this.answer = answer;
+        if(answer.getQuestion() != this){
+            answer.setQuestion(this);
+        }
+    }
 
-    public enum OrderStatus {
-        ORDER_REQUEST(1, "주문 요청"),
-        ORDER_CONFIRM(2, "주문 확정"),
-        ORDER_COMPLETE(3, "주문 처리 완료"),
-        ORDER_CANCEL(4, "주문 취소");
+    public enum QuestionStatus {
+        QUESTION_REGISTERED(1, "질문 등록 상태"),
+        QUESTION_ANSWERED(2, "답변 완료 상태"),
+        QUESTION_DELETED(3, "질문 삭제 상태"),
+        QUESTION_DEACTIVED(4, "질문 비활성화 상태");
 
         @Getter
         private int stepNumber;
@@ -62,8 +72,20 @@ public class Order {
         @Getter
         private String stepDescription;
 
-        OrderStatus(int stepNumber, String stepDescription) {
+        QuestionStatus(int stepNumber, String stepDescription) {
             this.stepNumber = stepNumber;
+            this.stepDescription = stepDescription;
+        }
+    }
+
+    public enum BoardStatus {
+        BOARD_PUBLIC( "공개글 상태"),
+        BOARD_SECRET( "비밀글 상태");
+
+        @Getter
+        private String stepDescription;
+
+        BoardStatus(String stepDescription) {
             this.stepDescription = stepDescription;
         }
     }

@@ -1,15 +1,16 @@
-package com.springboot.order.dto;
+package com.springboot.question.dto;
 
-import com.springboot.order.entity.Order;
+import com.springboot.question.entity.Question;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-// OrderPatchDto 추가 됨
 @Getter
-public class OrderPatchDto {
-    private long orderId;
-    private Order.OrderStatus orderStatus;
-
-    public void setOrderId(long orderId) {
-        this.orderId = orderId;
-    }
+@NoArgsConstructor
+public class QuestionPatchDto {
+    @Setter
+    private long questionId;
+    private String title;
+    private String content;
+    private Question.BoardStatus boardStatus;
 }

@@ -1,23 +1,18 @@
-package com.springboot.order.dto;
+package com.springboot.question.dto;
 
-import com.springboot.member.entity.Member;
 import lombok.Getter;
 
-import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
-import java.util.List;
 
 @Getter
-public class OrderPostDto {
+public class QuestionPostDto {
     @Positive
     private long memberId;
 
-    @Valid
-    private List<OrderCoffeeDto> orderCoffees;
+    @NotBlank
+    private String title;
 
-    public Member getMember() {
-        Member member = new Member();
-        member.setMemberId(memberId);
-        return member;
-    }
+    @NotBlank
+    private String content;
 }

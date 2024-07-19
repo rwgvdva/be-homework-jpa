@@ -4,12 +4,16 @@ import com.springboot.exception.BusinessLogicException;
 import com.springboot.exception.ExceptionCode;
 import com.springboot.member.entity.Member;
 import com.springboot.member.repository.MemberRepository;
+import com.springboot.question.entity.Question;
+import com.springboot.question.repository.QuestionRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -20,9 +24,11 @@ import java.util.Optional;
 @Service
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final QuestionRepository questionRepository;
 
-    public MemberService(MemberRepository memberRepository) {
+    public MemberService(MemberRepository memberRepository, QuestionRepository questionRepository) {
         this.memberRepository = memberRepository;
+        this.questionRepository = questionRepository;
     }
 
     public Member createMember(Member member) {
@@ -56,10 +62,18 @@ public class MemberService {
                 Sort.by("memberId").descending()));
     }
 
+    @Transactional
     public void deleteMember(long memberId) {
         Member findMember = findVerifiedMember(memberId);
 
-        memberRepository.delete(findMember);
+        findMember.setMemberStatus(Member.MemberStatus.MEMBER_QUIT);
+        List<Question> questions = findMember.getQuestions();
+        for (Question question : questions) {
+            question.setQuestionStatus(Question.QuestionStatus.QUESTION_DEACTIVED);
+            questionRepository.save(question);
+        }
+
+        memberRepository.save(findMember);
     }
 
     public Member findVerifiedMember(long memberId) {

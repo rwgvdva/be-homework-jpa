@@ -1,40 +1,60 @@
-package com.springboot.order.mapper;
+package com.springboot.question.mapper;
 
-import com.springboot.coffee.entity.Coffee;
+import com.springboot.answer.entity.Answer;
 import com.springboot.member.entity.Member;
-import com.springboot.order.dto.OrderPatchDto;
-import com.springboot.order.dto.OrderPostDto;
-import com.springboot.order.dto.OrderResponseDto;
-import com.springboot.order.entity.Order;
-import com.springboot.order.entity.OrderCoffee;
+import com.springboot.question.dto.QuestionPatchDto;
+import com.springboot.question.dto.QuestionPostDto;
+import com.springboot.question.dto.QuestionResponseDto;
+import com.springboot.question.entity.Question;
 import org.mapstruct.Mapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
-public interface OrderMapper {
-//    Order orderPostDtoToOrder(OrderPostDto orderPostDto);
-    default Order orderPostDtoToOrder(OrderPostDto orderPostDto){
-        Order order = new Order();
-        Member member = new Member();
-        member.setMemberId(orderPostDto.getMemberId());
-        List<OrderCoffee> orderCoffees = orderPostDto.getOrderCoffees().stream()
-                .map(orderCoffeeDto -> {
-                    OrderCoffee orderCoffee = new OrderCoffee();
-                    orderCoffee.setQuantity(orderCoffeeDto.getQuantity());
-                    Coffee coffee = new Coffee();
-                    coffee.setCoffeeId(orderCoffeeDto.getCoffeeId());
-                    orderCoffee.setOrder(order);
-                    orderCoffee.setCoffee(coffee);
-                    return orderCoffee;
-                }).collect(Collectors.toList());
-        order.setOrderCoffees(orderCoffees);
-        order.setMember(member);
+public interface QuestionMapper {
 
-        return order;
+    default Question questionPostDtoToQuestion(QuestionPostDto questionPostDto) {
+        Question question = new Question();
+        Member member = new Member();
+        member.setMemberId(questionPostDto.getMemberId());
+        question.setContent(questionPostDto.getContent());
+        question.setTitle(questionPostDto.getTitle());
+
+        question.setMember(member);
+        return question;
     }
-    Order orderPatchDtoToOrder(OrderPatchDto orderPatchDto);
-    OrderResponseDto orderToOrderResponseDto(Order order, List<Coffee> coffees);
-    List<OrderResponseDto> ordersToOrderResponseDtos(List<Order> orders);
+
+    ;
+
+    Question questionPatchDtoToQuestion(QuestionPatchDto questionPatchDto);
+
+    default QuestionResponseDto questionToQuestionResponseDto(Question question) {
+        if (question == null) {
+            return null;
+        }
+
+        QuestionResponseDto questionResponseDto = new QuestionResponseDto(question);
+        questionResponseDto.setQuestionId(question.getQuestionId());
+        questionResponseDto.setTitle(question.getTitle());
+        questionResponseDto.setContent(question.getContent());
+        questionResponseDto.setQuestionStatus(question.getQuestionStatus());
+        questionResponseDto.setCreatedAt(question.getCreatedAt());
+
+        Answer answer = question.getAnswer();
+        if (answer != null) {
+            questionResponseDto.setAnswerContent(answer.getAnswerContent());
+        }
+
+        questionResponseDto.setCountLikes(question.getLikes().size());
+
+        return questionResponseDto;
+    }
+
+
+    default List<QuestionResponseDto> questionsToQuestionResponseDtos(List<Question> questions) {
+        return questions.stream()
+                .map(question -> new QuestionResponseDto(question))
+                .collect(Collectors.toList());
+    }
 }

@@ -1,6 +1,8 @@
 package com.springboot.member.entity;
 
+import com.springboot.like.entity.Like;
 import com.springboot.order.entity.Order;
+import com.springboot.question.entity.Question;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -42,6 +44,12 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<Order> orders = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Question> questions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member")
+    private List<Like> likes = new ArrayList<>();
+
     public Member(String email) {
         this.email = email;
     }
@@ -54,6 +62,9 @@ public class Member {
 
     public void addOrder(Order order) {
         orders.add(order);
+    }
+    public void addQuestion(Question question) {
+        questions.add(question);
     }
 
     // 추가 된 부분
